@@ -32,7 +32,7 @@ KEY_CLASS   = {ord('t'): 0, ord('r'): 1, ord('c'): 2}
 COLORS      = [(60, 60, 220), (50, 200, 50), (220, 80, 220)]
 IMG_DIR     = Path("labeled/images")
 LBL_DIR     = Path("labeled/labels")
-CAMERA_INDEX = 0  # Change to 1 if wrong camera
+CAMERA_INDEX = 1  # Change to 1 if wrong camera
 
 IMG_DIR.mkdir(parents=True, exist_ok=True)
 LBL_DIR.mkdir(parents=True, exist_ok=True)
@@ -124,7 +124,7 @@ def save_frame(frame, boxes):
 def main():
     global frame_live, frame_edit, mode, boxes, current_box, drawing
 
-    cap = cv2.VideoCapture(CAMERA_INDEX)
+    cap = cv2.VideoCapture(CAMERA_INDEX, cv2.CAP_DSHOW)
     cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
     cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
 

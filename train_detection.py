@@ -106,7 +106,7 @@ def train():
     )
 
     # YOLOv8 detection saves to runs_detection/codekids/weights/
-    best = Path("runs_detection/codekids/weights/best.pt")
+    best = Path("runs/detect/runs_detection/codekids/weights/best.pt")
     if best.exists():
         shutil.copy(best, "model_detection.pt")
         print(f"\n✓ Model saved to model_detection.pt")
