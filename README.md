@@ -2,76 +2,63 @@
 
 ## Install dependencies
 ```bash
-pip install ultralytics opencv-python numpy requests kaggle
+pip install ultralytics opencv-python numpy requests kaggle pyyaml
 ```
 
 ---
 
-## Step 1 — Auto-Download Datasets
+## Step 1 — Label Your Training Data
 ```bash
-python setup.py
+python label.py
 ```
-This automatically downloads trash/recycling images from:
-- **TrashNet** (no account needed)
-- **Kaggle Garbage Classification** (optional, needs API key — see below)
+This opens your webcam. For each item:
+1. Press **SPACE** to freeze the frame
+2. **Click and drag** to draw a box around the object
+3. Press **T** (trash), **R** (recycling), or **C** (candy) to label it
+4. Press **U** to undo a box, **N** to save and go to the next frame
+5. Press **Q** when done
 
-**Kaggle API key setup (optional but recommended for more data):**
-1. Go to kaggle.com → Account → Create New API Token
-2. Move the downloaded `kaggle.json` to `~/.kaggle/kaggle.json`
-3. On Mac/Linux run: `chmod 600 ~/.kaggle/kaggle.json`
-4. Re-run `python setup.py`
+**Tips:**
+- Aim for **60-100 labeled frames** per class
+- Vary backgrounds, angles, lighting, and distances
+- Label your actual demo items (can, bottle, toilet paper roll, chip bag, straw, cup)
 
 ---
 
-## Step 2 — Collect Candy Images (Manual, ~15 min)
+## Step 2 — Train the Detection Model
 ```bash
-python collect_data.py
+python train_detection.py
 ```
-Public datasets don't have Starbursts, Dum Dums, or Hershey's Kisses,
-so you need to photograph these yourself.
-
-- Press **C** to save candy frames
-- Aim for **80+ images** — vary angles, backgrounds, and distances
-- Press **Q** when done
+- Takes ~15-30 min on CPU
+- Outputs `model_detection.pt`
+- Aim for **mAP50 > 0.70** before the showcase
+- If accuracy is low, label more images and retrain
 
 ---
 
-## Step 3 — Train the Model
-```bash
-python train.py
-```
-- Takes ~5–15 minutes on CPU
-- Outputs `model.pt` when done
-- Aim for **85%+ accuracy** before the showcase
-
----
-
-## Step 4 — Run the Showcase
+## Step 3 — Run the Showcase
 ```bash
 python showcase.py
 ```
-- **M** → switch between SORTING mode and CANDY HUNT mode
-- **Q** → quit
+- Draws **bounding boxes** around detected objects in real time
+- Shows the class label and confidence on each box
+- **M** to switch between SORTING and CANDY HUNT mode
+- **Q** to quit
 
-**If the camera doesn't open**, change `CAMERA_INDEX = 1` to `CAMERA_INDEX = 0`
-at the top of `showcase.py`.
+**If the camera doesn't open**, change CAMERA_INDEX at the top of showcase.py and label.py.
 
 ---
 
-## Adding More Candy Types
-To add Skittles, M&Ms, etc.:
-1. Add a new folder: `data/skittles/`
-2. Collect images with `collect_data.py` (add a new key binding)
-3. Add `"skittles"` to the `CLASSES` list in all files
-4. Add an entry to `CLASS_CONFIG` in `showcase.py`
-5. Re-run `train.py`
+## Adding Candy Later
+1. Label candy images using label.py (press C to label)
+2. Add "candy" back to CLASSES in train_detection.py and showcase.py
+3. Re-run train_detection.py
 
 ---
 
 ## File Overview
 | File | Purpose |
 |------|---------|
-| `setup.py` | Auto-downloads trash/recycling datasets |
-| `collect_data.py` | Webcam tool to capture candy training images |
-| `train.py` | Fine-tunes YOLOv8 on your images |
-| `showcase.py` | Live demo with big labels + candy hunt mode |
+| `label.py` | Webcam bounding box labeling tool |
+| `train_detection.py` | Trains YOLOv8 detection model |
+| `showcase.py` | Live demo with detection boxes + candy hunt mode |

@@ -21,7 +21,7 @@ from pathlib import Path
 
 # ── Config ────────────────────────────────────────────────────────────────────
 MODEL_PATH   = "model_detection.pt"
-CAMERA_INDEX = 0
+CAMERA_INDEX = 1
 CONF_THRESH  = 0.50
 CLASSES      = ["trash", "recycling", "candy"]
 # ─────────────────────────────────────────────────────────────────────────────
@@ -140,7 +140,7 @@ def main():
     model = YOLO(MODEL_PATH)
     print("Ready! Starting camera...")
 
-    cap = cv2.VideoCapture(CAMERA_INDEX)
+    cap = cv2.VideoCapture(CAMERA_INDEX, cv2.CAP_DSHOW)
     cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
     cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
 
