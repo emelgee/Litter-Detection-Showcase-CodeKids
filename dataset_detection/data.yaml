@@ -1,7 +1,0 @@
-names:
-- trash
-- recycling
-nc: 2
-path: C:\Users\marti_yuxwt5d\OneDrive\Desktop\Litter-Detection-Showcase-CodeKids\dataset_detection
-train: train/images
-val: val/images
