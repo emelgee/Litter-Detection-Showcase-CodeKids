@@ -1,0 +1,31 @@
+# Dataset - share via Google Drive instead
+labeled/
+runs/
+dataset_detection/
+
+# Model weights
+*.pt
+*.onnx
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.env
+venv/
+env/
+
+# Images/video (keep code only)
+*.jpg
+*.jpeg
+*.png
+*.mp4
+*.avi
+
+# OS junk
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# VS Code
+.vscode/
