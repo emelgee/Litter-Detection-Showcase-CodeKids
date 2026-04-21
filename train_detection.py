@@ -16,10 +16,13 @@ Outputs model_detection.pt when done.
 """
 
 import os
+import sys
 import shutil
 import random
 import yaml
+import logging
 from pathlib import Path
+from datetime import datetime
 from ultralytics import YOLO
 
 # ── Config ────────────────────────────────────────────────────────────────────
@@ -30,7 +33,31 @@ VAL_SPLIT    = 0.2
 EPOCHS       = 100
 IMAGE_SIZE   = 640                      # detection works better at 640
 MODEL_BASE   = "yolov8n.pt"            # nano detection model
+LOG_FILE     = "training_log.txt"
 # ─────────────────────────────────────────────────────────────────────────────
+
+def setup_logging():
+    """Log to both terminal and file simultaneously."""
+    log = logging.getLogger()
+    log.setLevel(logging.INFO)
+
+    # File handler
+    fh = logging.FileHandler(LOG_FILE, encoding="utf-8")
+    fh.setLevel(logging.INFO)
+
+    # Terminal handler
+    sh = logging.StreamHandler(sys.stdout)
+    sh.setLevel(logging.INFO)
+
+    fmt = logging.Formatter("%(asctime)s  %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
+    fh.setFormatter(fmt)
+    sh.setFormatter(fmt)
+
+    log.addHandler(fh)
+    log.addHandler(sh)
+
+def log(msg):
+    logging.info(msg)
 
 def build_dataset():
     if DATASET_DIR.exists():
@@ -44,7 +71,7 @@ def build_dataset():
     random.shuffle(images)
 
     if len(images) == 0:
-        print("ERROR: No labeled images found. Run label.py first.")
+        log("ERROR: No labeled images found. Run label.py first.")
         return 0
 
     n_val      = max(1, int(len(images) * VAL_SPLIT))
@@ -58,8 +85,8 @@ def build_dataset():
             if lbl.exists():
                 shutil.copy(lbl, DATASET_DIR / split / "labels" / lbl.name)
 
-    print(f"  Train: {len(train_imgs)} images")
-    print(f"  Val:   {len(val_imgs)} images")
+    log(f"  Train: {len(train_imgs)} images")
+    log(f"  Val:   {len(val_imgs)} images")
     return len(images)
 
 def write_yaml():
@@ -76,22 +103,25 @@ def write_yaml():
     return yaml_path
 
 def train():
-    print("=" * 55)
-    print("  CodeKids Detection Trainer")
-    print("=" * 55)
+    setup_logging()
 
-    print("\nBuilding dataset split...")
+    log("=" * 55)
+    log("  CodeKids Detection Trainer")
+    log(f"  Started: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+    log("=" * 55)
+
+    log("Building dataset split...")
     total = build_dataset()
     if total == 0:
         return
 
-    print("Writing data.yaml...")
+    log("Writing data.yaml...")
     yaml_path = write_yaml()
 
-    print(f"\nLoading base model: {MODEL_BASE}")
+    log(f"Loading base model: {MODEL_BASE}")
     model = YOLO(MODEL_BASE)
 
-    print(f"Training for up to {EPOCHS} epochs...")
+    log(f"Training for up to {EPOCHS} epochs...")
     results = model.train(
         data    = str(yaml_path),
         epochs  = EPOCHS,
@@ -109,16 +139,20 @@ def train():
     best = Path("runs/detect/runs_detection/codekids/weights/best.pt")
     if best.exists():
         shutil.copy(best, "model_detection.pt")
-        print(f"\n✓ Model saved to model_detection.pt")
+        log("✓ Model saved to model_detection.pt")
         box_map = results.results_dict.get("metrics/mAP50(B)", "N/A")
-        print(f"  mAP50: {box_map}")
-        print("\n  Good results:  mAP50 > 0.7")
-        print("  Great results: mAP50 > 0.85")
+        log(f"  mAP50: {box_map}")
+        log("  Good results:  mAP50 > 0.7")
+        log("  Great results: mAP50 > 0.85")
     else:
-        print("\nERROR: Weights not found.")
-        print("Check runs_detection/codekids/weights/ manually.")
+        log("ERROR: Weights not found.")
+        log("Check runs_detection/codekids/weights/ manually.")
 
-    print("\nDone! Run showcase.py to start the live demo.")
+    log(f"  Finished: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+    log("Done! Run showcase.py to start the live demo.")
 
 if __name__ == "__main__":
-    train()
+    try:
+        train()
+    except Exception as e:
+        logging.exception(f"CRASH: {e}")
