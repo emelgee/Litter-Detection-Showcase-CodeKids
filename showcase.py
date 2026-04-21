@@ -21,7 +21,7 @@ from pathlib import Path
 
 # ── Config ────────────────────────────────────────────────────────────────────
 MODEL_PATH   = "model_detection.pt"
-CAMERA_INDEX = 1
+CAMERA_INDEX = 0
 CONF_THRESH  = 0.50
 CLASSES      = ["trash", "recycling", "candy"]
 # ─────────────────────────────────────────────────────────────────────────────

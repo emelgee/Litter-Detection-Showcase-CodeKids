@@ -76,7 +76,7 @@ def draw_hud(img, mode, boxes):
     if mode == "live":
         msg = "SPACE=Capture frame    Q=Quit"
     else:
-        msg = "T=Trash  R=Recycle  C=Candy  U=Undo  N=Next frame  Q=Quit"
+        msg = "T=Trash  R=Recycle  C=Candy  U=Undo  N=Next frame (no boxes=background)  Q=Quit"
     cv2.putText(out, msg, (10, h-15),
                 cv2.FONT_HERSHEY_SIMPLEX, 0.55, (200,200,200), 1)
 
@@ -106,12 +106,15 @@ def mouse_cb(event, x, y, flags, param):
         current_box = (start_pt[0], start_pt[1], x, y)
 
 def save_frame(frame, boxes):
-    if not boxes:
-        print("No boxes — frame skipped.")
-        return
     ts   = int(time.time() * 1000)
     name = f"frame_{ts}"
     cv2.imwrite(str(IMG_DIR / f"{name}.jpg"), frame)
+
+    if not boxes:
+        # No label file = background/negative sample
+        print(f"Saved {name} as background (no boxes).")
+        return
+
     h, w = frame.shape[:2]
     lines = []
     for (x1, y1, x2, y2, cls_id) in boxes:
@@ -138,6 +141,7 @@ def main():
 
     print("Labeling Tool Ready")
     print("SPACE=Capture  T=Trash  R=Recycle  C=Candy  U=Undo  N=Next  Q=Quit")
+    print("Tip: Press N with no boxes to save a background (negative) sample.")
 
     while True:
         if mode == "live":
@@ -161,7 +165,7 @@ def main():
             boxes      = []
             current_box = None
             mode       = "edit"
-            print("Frame captured. Draw boxes, then press T/R/C to label.")
+            print("Frame captured. Draw boxes and label, or press N to save as background.")
 
         elif key in KEY_CLASS and mode == "edit" and current_box:
             x1,y1,x2,y2 = current_box
