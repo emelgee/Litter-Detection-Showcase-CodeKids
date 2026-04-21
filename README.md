@@ -22,6 +22,7 @@ This opens your webcam. For each item:
 - Aim for **60-100 labeled frames** per class
 - Vary backgrounds, angles, lighting, and distances
 - Label your actual demo items (can, bottle, toilet paper roll, chip bag, straw, cup)
+- If you accidentally forget to label soemthing, you can use image_keep.py to scroll through - images and delete ones that are labeled badly
 
 ---
 
